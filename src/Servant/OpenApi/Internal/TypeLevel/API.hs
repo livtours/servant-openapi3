@@ -13,6 +13,9 @@ import           Servant.API
 #if MIN_VERSION_servant(0,19,0)
 import           Servant.API.Generic (ToServantApi)
 #endif
++#if MIN_VERSION_servant(0,20,3)
++import Servant.API.MultiVerb (MultiVerb, ResponseTypes)
++#endif
 
 -- | Build a list of endpoints from an API.
 type family EndpointsList api where
@@ -89,6 +92,9 @@ type family BodyTypes' c api :: [*] where
   BodyTypes' c (Verb verb b cs (Headers hdrs a)) = AddBodyType c cs a '[]
   BodyTypes' c (Verb verb b cs NoContent) = '[]
   BodyTypes' c (Verb verb b cs a) = AddBodyType c cs a '[]
++#if MIN_VERSION_servant(0,20,3)
++  BodyTypes' c (MultiVerb verb cs as _) = AddBodyType c cs () (ResponseTypes as)
++#endif
   BodyTypes' c (ReqBody' mods cs a :> api) = AddBodyType c cs a (BodyTypes' c api)
   BodyTypes' c (e :> api) = BodyTypes' c api
   BodyTypes' c (a :<|> b) = AppendList (BodyTypes' c a) (BodyTypes' c b)
